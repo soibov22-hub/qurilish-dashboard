@@ -1,41 +1,31 @@
 import streamlit as st
-import pandas as pd
 import plotly.express as px
+import pandas as pd
 
-# 1. Konfiguratsiya
-st.set_page_config(page_title="Pro Dashboard", layout="wide")
+# 1. Viloyatlar uchun namuna ma'lumotlar
+hududlar_data = {
+    'Region': ['Toshkent shahri', 'Toshkent viloyati', 'Samarqand', 'Farg\'ona', 'Andijon', 
+               'Namangan', 'Buxoro', 'Navoiy', 'Qashqadaryo', 'Surxondaryo', 
+               'Jizzax', 'Sirdaryo', 'Xorazm', 'Qoraqalpog\'iston R.'],
+    'Qurilish_Hajmi': [25.4, 12.8, 9.2, 8.5, 7.1, 6.8, 6.2, 5.9, 5.5, 4.8, 4.2, 3.1, 3.5, 4.0]
+}
+df_regions = pd.DataFrame(hududlar_data)
 
-# 2. Ma'lumotlar
-yillar = list(range(2015, 2026))
-ulush = [5.2, 5.6, 5.4, 5.8, 6.3, 6.7, 6.7, 6.7, 7.3, 7.2, 7.3]
-df = pd.DataFrame({'Yil': yillar, 'YAIM ulushi (%)': ulush})
+st.subheader("🗺 O‘zbekiston hududlari bo‘yicha qurilish faolligi")
 
-# 3. Sidebar - Filtrlar
-st.sidebar.header("Tahlil Sozlamalari")
-rang_tanlash = st.sidebar.color_picker("Grafik rangini tanlang", "#00CC96")
-yil_diapazon = st.sidebar.select_slider("Yillarni tanlang", options=yillar, value=(2015, 2025))
+# 2. Xaritani chizish (Bar chart ko'rinishida hududiy taqsimot)
+# Eslatma: To'liq geografik xarita uchun GeoJSON fayli yuklanishi shart.
+# Hozircha hududiy reytingni interaktiv ko'rinishda chiqaramiz:
 
-# Ma'lumotlarni filtrlash
-filtered_df = df[(df['Yil'] >= yil_diapazon[0]) & (df['Yil'] <= yil_diapazon[1])]
+fig_map = px.bar(df_regions.sort_values('Qurilish_Hajmi'), 
+                 x='Qurilish_Hajmi', 
+                 y='Region', 
+                 orientation='h',
+                 title="Hududlar kesimida YAIMga qo'shilgan ulush (%)",
+                 color='Qurilish_Hajmi',
+                 color_continuous_scale='Viridis',
+                 labels={'Qurilish_Hajmi': 'Ulush (%)', 'Region': 'Viloyat'})
 
-# 4. Asosiy qism
-st.title("🏗 Qurilish Sohasi Kengaytirilgan Dashboardi")
+st.plotly_chart(fig_map, use_container_width=True)
 
-# KPI qismi
-c1, c2, c3 = st.columns(3)
-c1.metric("Tanlangan davrdagi o'rtacha", f"{filtered_df['YAIM ulushi (%)'].mean():.1f}%")
-c2.metric("O'sish sur'ati", f"{filtered_df['YAIM ulushi (%)'].iloc[-1] - filtered_df['YAIM ulushi (%)'].iloc[0]:.1f}%")
-c3.status("Ma'lumotlar holati", state="complete")
-
-# 5. Grafik
-fig = px.bar(filtered_df, x='Yil', y='YAIM ulushi (%)', 
-             title="Yillik ulush (Bar Chart ko'rinishida)",
-             text_auto=True)
-fig.update_traces(marker_color=rang_tanlash)
-st.plotly_chart(fig, use_container_width=True)
-
-# 6. Izoh qo'shish
-st.info(f"Siz hozirda {yil_diapazon[0]} va {yil_diapazon[1]} yillar oralig'idagi ma'lumotlarni ko'ryapsiz.")
-
-# 7. Yuklab olish
-st.download_button("Excelga eksport qilish", filtered_df.to_csv(), "data.csv")
+st.info("💡 Ushbu ma'lumotlar Stat.uz portali asosida shakllantirilishi mumkin.")
