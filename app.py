@@ -49,11 +49,11 @@ if uzb_geojson:
     )
     
     # Xaritani O'zbekistonga fokuslash
-    fig.update_geos(
-        visible=False,
-        center={"lat": 41.3, "lon": 64.5},
-        projection_scale=15
-    )
+   fig.update_geos(
+    visible=False, # Dunyo xaritasini yashirib, faqat viloyatlarni qoldiradi
+    center={"lat": 41.3775, "lon": 64.5853}, # O'zbekiston markazi
+    projection_scale=15 # Kattalashtirish darajasi
+)
     
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
     st.plotly_chart(fig, use_container_width=True)
