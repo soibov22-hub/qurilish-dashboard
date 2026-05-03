@@ -40,18 +40,15 @@ st.title("🏗 O'zbekiston Qurilish Sohasi Dashboardi")
 if uzb_geojson:
     st.subheader("📍 Hududiy nomutanosiblik xaritasi")
     
-    fig = px.choropleth(
-        df,
-        geojson=uzb_geojson,
-        locations='Region',
-        featureidkey="properties.ADM1_UZ", # <--- Skrinshotga asosan o'zgartirildi
-        color='YAIM_Ulushi',
-        color_continuous_scale="Viridis",
-        labels={'YAIM_Ulushi': 'Ulush (%)'},
-        hover_name='Region'
-    )
-    
-    fig.update_geos(fitbounds="locations", visible=False)
+   fig = px.choropleth(
+    df,
+    geojson=uzb_geojson,
+    locations='Region',
+    featureidkey="properties.ADM1_UZ",  # <--- BU JUDA MUHIM
+    color='YAIM_Ulushi',
+    color_continuous_scale="Viridis",
+)
+fig.update_geos(fitbounds="locations", visible=False)
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=600)
     
     st.plotly_chart(fig, use_container_width=True)
