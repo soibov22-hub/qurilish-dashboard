@@ -78,9 +78,9 @@ with col2:
     )
 
 # 6. GeoJSON nomlarini tekshirish (Ishlab ketganidan keyin bu qismni o'chirib tashlashingiz mumkin)
-with st.expander("Texnik ma'lumot: GeoJSON ichidagi nomlarni ko'rish"):
-    if uzb_geojson:
-        geojson_names = [f['properties'].get('name', 'Nomsiz') for f in uzb_geojson['features']]
-        st.write(geojson_names)
+with st.expander("GeoJSON strukturasini tekshirish"):
+    if uzb_geojson and len(uzb_geojson['features']) > 0:
+        # Birinchi hududning barcha xususiyatlarini (properties) ko'rish
+        st.write(uzb_geojson['features'][0]['properties'])
     else:
         st.write("Fayl topilmadi.")
