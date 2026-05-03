@@ -14,7 +14,7 @@ except Exception as e:
     st.error(f"Xarita faylini o'qishda xatolik: {e}")
     uzb_geojson = None
 
-# 3. MA'LUMOTLAR (Aniq 14 ta hudud va 14 ta raqam)
+# 3. MA'LUMOTLAR
 data = {
     'Region': [
         'Tashkent City', 'Tashkent', 'Samarkand', 'Fergana', 'Andijan', 
@@ -28,7 +28,6 @@ data = {
     ]
 }
 
-# Lug'atni jadvalga aylantiramiz
 df = pd.DataFrame(data)
 
 # 4. Sarlavha
@@ -48,12 +47,12 @@ if uzb_geojson:
         labels={'YAIM_Ulushi': 'Ulush (%)'}
     )
     
-    # Xaritani O'zbekistonga fokuslash
-   fig.update_geos(
-    visible=False, # Dunyo xaritasini yashirib, faqat viloyatlarni qoldiradi
-    center={"lat": 41.3775, "lon": 64.5853}, # O'zbekiston markazi
-    projection_scale=15 # Kattalashtirish darajasi
-)
+    # DIQQAT: Bu qatorlar endi to'g'ri surilgan (indentation)
+    fig.update_geos(
+        visible=False,
+        center={"lat": 41.3775, "lon": 64.5853},
+        projection_scale=15
+    )
     
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
     st.plotly_chart(fig, use_container_width=True)
