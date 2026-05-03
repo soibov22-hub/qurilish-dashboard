@@ -17,12 +17,13 @@ except FileNotFoundError:
 # 3. Viloyatlar bo'yicha ilmiy ma'lumotlar
 data = {
     'Region': [
-        'Tashkent City', 'Tashkent', 'Samarqand', 'Fergana', 'Andijon', 
+        'Tashkent City', 'Tashkent', 'Samarkand', 'Fergana', 'Andijan', 
         'Namangan', 'Bukhara', 'Navoi', 'Kashkadarya', 'Surkhandarya', 
         'Jizzakh', 'Sirdaryo', 'Khorezm', 'Karakalpakstan'
     ],
     'YAIM_Ulushi': [25.4, 12.8, 9.2, 8.5, 7.1, 6.8, 6.2, 5.9, 5.5, 4.8, 4.2, 3.1, 3.5, 4.0]
-}
+},
+
 df = pd.DataFrame(data)
 
 # 4. Asosiy interfeys
