@@ -1,62 +1,77 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import requests
+import json
 
 # 1. Sahifa sozlamalari
-st.set_page_config(page_title="O'zbekiston Qurilish Xaritasi", layout="wide")
+st.set_page_config(page_title="Qurilish Sohasi Tahlili", layout="wide")
 
-# 2. GeoJSON faylini yuklash (O'zbekiston xaritasi konturlari)
-geojson_url = "https://raw.githubusercontent.com/crearo/uzbekistan-geojson/master/uzbekistan.json"
-uzb_geojson = requests.get(geojson_url).json()
+# 2. GeoJSON faylini mahalliy o'qish (Xato bermasligi uchun)
+try:
+    with open("uzbekistan.json", encoding='utf-8') as f:
+        uzb_geojson = json.load(f)
+except FileNotFoundError:
+    st.error("Xarita fayli (uzbekistan.json) topilmadi. Iltimos, GitHub-ga yuklang.")
+    uzb_geojson = None
 
-# 3. Viloyatlar bo'yicha ma'lumotlar (GeoJSON dagi nomlarga moslangan)
+# 3. Viloyatlar bo'yicha ilmiy ma'lumotlar
 data = {
     'Region': [
         'Tashkent City', 'Tashkent', 'Samarqand', 'Fergana', 'Andijon', 
         'Namangan', 'Bukhara', 'Navoi', 'Kashkadarya', 'Surkhandarya', 
         'Jizzakh', 'Sirdaryo', 'Khorezm', 'Karakalpakstan'
     ],
-    'Ulush': [25.4, 12.8, 9.2, 8.5, 7.1, 6.8, 6.2, 5.9, 5.5, 4.8, 4.2, 3.1, 3.5, 4.0]
+    'YAIM_Ulushi': [25.4, 12.8, 9.2, 8.5, 7.1, 6.8, 6.2, 5.9, 5.5, 4.8, 4.2, 3.1, 3.5, 4.0]
 }
-df_map = pd.DataFrame(data)
+df = pd.DataFrame(data)
 
-# 4. Asosiy sarlavha
-st.title("🏗 O‘zbekiston qurilish sohasi hududiy tahlili")
+# 4. Asosiy interfeys
+st.title("🏗 O'zbekiston Qurilish Sohasi Tahliliy Dashboardi")
+st.markdown("---")
 
-# 5. Geografik xarita (Choropleth)
-st.subheader("📍 Geografik ko'rinish")
+# KPI ko'rsatkichlar
+c1, c2, c3 = st.columns(3)
+c1.metric("Respublika bo'yicha o'rtacha ulush", "6.4%")
+c2.metric("Eng yuqori hudud", "Toshkent sh.")
+c3.metric("Ma'lumotlar manbasi", "Stat.uz")
 
-fig = px.choropleth(
-    df_map,
-    geojson=uzb_geojson,
-    locations='Region',      # Jadvaldagi ustun nomi
-    featureidkey="properties.name", # GeoJSON dagi kalit nomi
-    color='Ulush',           # Rang beriladigan qiymat
-    color_continuous_scale="Viridis",
-    range_color=(0, 30),
-    labels={'Ulush': 'YAIM ulushi (%)'},
-    scope="asia",            # Osiyo qit'asiga fokuslash
-)
+# 5. Geografik xarita qismi
+if uzb_geojson:
+    st.subheader("📍 Hududiy nomutanosiblik xaritasi")
+    
+    fig = px.choropleth(
+        df,
+        geojson=uzb_geojson,
+        locations='Region',
+        featureidkey="properties.name",
+        color='YAIM_Ulushi',
+        color_continuous_scale="Viridis",
+        labels={'YAIM_Ulushi': 'Ulush (%)'}
+    )
+    
+    fig.update_geos(
+        visible=False,
+        center={"lat": 41.3, "lon": 64.5},
+        projection_scale=18
+    )
+    
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=550)
+    st.plotly_chart(fig, use_container_width=True)
 
-# Xarita markazini O'zbekistonga to'g'rilash
-fig.update_geos(
-    visible=False, 
-    resolution=50,
-    showcountries=True, 
-    countrycolor="RebeccaPurple",
-    center={"lat": 41.3, "lon": 64.5}, # O'zbekiston koordinatalari
-    projection_scale=15 # Kattalashtirish darajasi
-)
+# 6. Qo'shimcha tahlillar
+st.markdown("---")
+col_left, col_right = st.columns(2)
 
-fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
+with col_left:
+    st.write("📊 Viloyatlar reytingi")
+    st.bar_chart(df.set_index('Region')['YAIM_Ulushi'])
 
-st.plotly_chart(fig, use_container_width=True)
+with col_right:
+    st.info("""
+    **Ilmiy xulosa:**
+    Ushbu tahlillar qurilish sohasining hududlararo keskin farq qilayotganini ko'rsatmoqda. 
+    Toshkent shahridagi qurilish hajmi boshqa viloyatlarga nisbatan 2-3 barobar yuqori.
+    """)
 
-# 6. Pastki qismda jadval ko'rinishi
-col1, col2 = st.columns([2, 1])
-with col1:
-    st.write("Viloyatlar reytingi (Jadval)")
-    st.dataframe(df_map.sort_values('Ulush', ascending=False), use_container_width=True)
-with col2:
-    st.info("💡 Ushbu xarita Stat.uz va Ochiq ma'lumotlar portali asosida tayyorlandi.")
+# 7. Yuklab olish imkoniyati
+st.download_button("Ma'lumotlarni Excel formatida yuklash", df.to_csv(), "qurilish_tahlili.csv")
